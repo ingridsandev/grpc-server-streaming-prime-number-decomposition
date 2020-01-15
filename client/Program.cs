@@ -26,12 +26,10 @@ namespace client
                 Console.WriteLine("type the number ");
                 var number = Console.ReadLine();
                 
-                var request = new PrimeNumberDecompositionRequest()
+                var response = client.PrimeNumberDecomposition(new PrimeNumberDecompositionRequest()
                 {
                     Number = Convert.ToInt32(number)
-                };
-
-                var response = client.PrimeNumberDecomposition(request);
+                }, deadline: DateTime.UtcNow.AddMilliseconds(500));
 
                 while (await response.ResponseStream.MoveNext())
                 {
@@ -41,6 +39,10 @@ namespace client
 
                 channel.ShutdownAsync().Wait();
                 Console.ReadLine();
+            }
+            catch (RpcException e) when (e.StatusCode == StatusCode.DeadlineExceeded)
+            {
+                Console.WriteLine($"The communication exceeded the deadline");
             }
             catch (RpcException e)
             {
