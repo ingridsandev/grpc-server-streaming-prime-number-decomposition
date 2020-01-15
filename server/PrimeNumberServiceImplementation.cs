@@ -10,24 +10,31 @@ namespace server
     {
         public override async Task PrimeNumberDecomposition(PrimeNumberDecompositionRequest request, IServerStreamWriter<PrimeNumberDecompositionResponse> responseStream, ServerCallContext context)
         {
-            Console.WriteLine("The server received the request : ");
-            Console.WriteLine(request.ToString());
-
-            int number = request.Number;
-            int divisor = 2;
-
-            while (number > 1)
+            try
             {
-                if (number % divisor == 0)
+                Console.WriteLine("The server received the request : ");
+                Console.WriteLine(request.ToString());
+
+                int number = request.Number;
+                int divisor = 2;
+
+                while (number > 1)
                 {
-                    number /= divisor;
-                    await responseStream.WriteAsync(new PrimeNumberDecompositionResponse()
+                    if (number % divisor == 0)
                     {
-                        PrimeFactor = divisor
-                    });
+                        number /= divisor;
+                        await responseStream.WriteAsync(new PrimeNumberDecompositionResponse()
+                        {
+                            PrimeFactor = divisor
+                        });
+                    }
+                    else
+                        divisor++;
                 }
-                else
-                    divisor++;
+            }
+            catch (System.Exception e)
+            {
+                throw new RpcException(new Status(StatusCode.Internal, $"Something went wrong - Exception: {e}"));
             }
         }
     }
