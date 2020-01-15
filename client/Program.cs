@@ -11,34 +11,41 @@ namespace client
 
         static async Task Main(string[] args)
         {
-            Channel channel = new Channel(target, ChannelCredentials.Insecure);
-
-            await channel.ConnectAsync().ContinueWith((task) =>
+            try
             {
-                if (task.Status == TaskStatus.RanToCompletion)
-                    Console.WriteLine("The client connected successfully");
-            });
+                Channel channel = new Channel(target, ChannelCredentials.Insecure);
 
-            var client = new PrimeNumberService.PrimeNumberServiceClient(channel);
+                await channel.ConnectAsync().ContinueWith((task) =>
+                {
+                    if (task.Status == TaskStatus.RanToCompletion)
+                        Console.WriteLine("The client connected successfully");
+                });
 
-            Console.WriteLine("type the number ");
-            var number = Console.ReadLine();
-            
-            var request = new PrimeNumberDecompositionRequest()
-            {
-                Number = Convert.ToInt32(number)
-            };
+                var client = new PrimeNumberService.PrimeNumberServiceClient(channel);
 
-            var response = client.PrimeNumberDecomposition(request);
+                Console.WriteLine("type the number ");
+                var number = Console.ReadLine();
+                
+                var request = new PrimeNumberDecompositionRequest()
+                {
+                    Number = Convert.ToInt32(number)
+                };
 
-            while (await response.ResponseStream.MoveNext())
-            {
-                Console.WriteLine(response.ResponseStream.Current.PrimeFactor);
-                await Task.Delay(200);
+                var response = client.PrimeNumberDecomposition(request);
+
+                while (await response.ResponseStream.MoveNext())
+                {
+                    Console.WriteLine(response.ResponseStream.Current.PrimeFactor);
+                    await Task.Delay(200);
+                }
+
+                channel.ShutdownAsync().Wait();
+                Console.ReadLine();
             }
-
-            channel.ShutdownAsync().Wait();
-            Console.ReadLine();
+            catch (RpcException e)
+            {
+                Console.WriteLine($"StatusCode: {e.Status.StatusCode} | Detail: {e.Status.Detail}");
+            }
         }
     }
 }
