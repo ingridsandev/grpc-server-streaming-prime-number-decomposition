@@ -46,6 +46,10 @@ namespace client
             {
                 Console.WriteLine($"StatusCode: {e.Status.StatusCode} | Detail: {e.Status.Detail}");
             }
+            catch (Exception e)
+            {
+                Console.WriteLine("Something went wrong.");
+            }
         }
     }
 }
