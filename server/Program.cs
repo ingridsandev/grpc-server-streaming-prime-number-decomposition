@@ -1,6 +1,10 @@
-﻿using Grpc.Core;
+﻿using Google.Protobuf.Reflection;
+using Grpc.Core;
+using Grpc.Reflection;
+using Grpc.Reflection.V1Alpha;
 using Prime;
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace server
@@ -17,7 +21,11 @@ namespace server
             {
                 server = new Server()
                 {
-                    Services = { PrimeNumberService.BindService(new PrimeNumberServiceImplementation()) },
+                    Services = 
+                    { 
+                        PrimeNumberService.BindService(new PrimeNumberServiceImplementation()),
+                        ServerReflection.BindService(new ReflectionServiceImpl(new List<ServiceDescriptor>() { PrimeNumberService.Descriptor }))
+                    },
                     Ports = { new ServerPort("localhost", Port, ServerCredentials.Insecure) }
                 };
 
